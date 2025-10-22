@@ -9,11 +9,30 @@
     <link href="/gestion.css" rel="stylesheet">
 </head>
 <body>
-<nav class="navbar navbar-dark b    g-primary">
+<!-- Barra de navegación superior -->
+<nav class="navbar navbar-expand-lg navbar-dark nav-custom">
     <div class="container-fluid">
-            <span class="navbar-brand mb-0 h1">
-                <i class="bi bi-box-seam"></i> Sistema de Gestión de Inventarios
-            </span>
+        <span class="navbar-brand mb-0 h1">
+            <i class="bi bi-shop"></i> Gestión de Inventario
+        </span>
+
+        <!-- Botones de navegación -->
+        <div class="navbar-nav ms-auto">
+            <div class="d-flex flex-wrap">
+                <a href="/productos" class="btn btn-nav btn-products me-2">
+                    <i class="bi bi-box-seam"></i> Productos
+                </a>
+                <a href="/proveedores" class="btn btn-nav btn-suppliers me-2">
+                    <i class="bi bi-truck"></i> Proveedores
+                </a>
+                <a href="/clientes" class="btn btn-nav btn-clients me-2">
+                    <i class="bi bi-people-fill"></i> Clientes
+                </a>
+                <a href="/ventas" class="btn btn-nav btn-sales">
+                    <i class="bi bi-cart-check"></i> Ventas
+                </a>
+            </div>
+        </div>
     </div>
 </nav>
 
@@ -24,7 +43,6 @@
         </div>
     </div>
 
-    <!-- Botón para abrir modal de crear producto -->
     <div class="row mb-3">
         <div class="col-12">
             <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalProducto" onclick="limpiarFormulario()">
@@ -33,7 +51,6 @@
         </div>
     </div>
 
-    <!-- Buscador por marca -->
     <div class="row mb-3">
         <div class="col-md-6">
             <div class="card">
