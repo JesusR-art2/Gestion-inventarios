@@ -101,5 +101,8 @@ public class BuildObjectMapper {
         return updatedObject;
     }
 
+    public static BuildObjectMapper getInstance() {
+        return INSTANCE;
+    }
 
 }
