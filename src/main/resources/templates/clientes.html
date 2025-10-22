@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Clientes</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link href="/gestion.css" rel="stylesheet">
+</head>
+<body>
+<nav class="navbar navbar-dark bg-dark">
+    <div class="container-fluid">
+        <span class="navbar-brand mb-0 h1">
+            <i class="bi bi-people-fill"></i> Sistema de Gestión de Clientes
+        </span>
+        <div>
+            <a href="/productos" class="btn btn-light btn-sm me-2">
+                <i class="bi bi-box-seam"></i> Productos
+            </a>
+        </div>
+    </div>
+</nav>
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <h2 class="mb-4">Gestión de Clientes</h2>
+        </div>
+    </div>
+
+    <!-- Botón para abrir modal de crear cliente -->
+    <div class="row mb-3">
+        <div class="col-12">
+            <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalCliente" onclick="limpiarFormulario()">
+                <i class="bi bi-person-plus"></i> Nuevo Cliente
+            </button>
+        </div>
+    </div>
+
+    <!-- Buscadores -->
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Buscar por Nombre</h5>
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="searchNombre" placeholder="Ingrese nombre...">
+                        <button class="btn btn-success" type="button" onclick="buscarPorNombre()">
+                            <i class="bi bi-search"></i> Buscar
+                        </button>
+                        <button class="btn btn-secondary" type="button" onclick="cargarClientes()">
+                            <i class="bi bi-arrow-clockwise"></i> Mostrar Todos
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Buscar por Documento</h5>
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="searchDocumento" placeholder="Ingrese documento...">
+                        <button class="btn btn-success" type="button" onclick="buscarPorDocumento()">
+                            <i class="bi bi-search"></i> Buscar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabla de clientes -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Lista de Clientes</h5>
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                            <tr>
+                                <th>ID</th>
+                                <th>Documento</th>
+                                <th>Nombre Completo</th>
+                                <th>Email</th>
+                                <th>Teléfono</th>
+                                <th>Dirección</th>
+                                <th>Acciones</th>
+                            </tr>
+                            </thead>
+                            <tbody id="tablaClientes">
+                            <tr>
+                                <td colspan="7" class="text-center">
+                                    <div class="spinner-border text-success" role="status">
+                                        <span class="visually-hidden">Cargando...</span>
+                                    </div>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para crear/editar cliente -->
+<div class="modal fade" id="modalCliente" tabindex="-1" aria-labelledby="modalClienteLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title" id="modalClienteLabel">Nuevo Cliente</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="formCliente">
+                    <input type="hidden" id="clienteId">
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="documento" class="form-label">Documento *</label>
+                            <input type="text" class="form-control" id="documento" required>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="nombre" class="form-label">Nombre *</label>
+                            <input type="text" class="form-control" id="nombre" required>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="apellido" class="form-label">Apellido</label>
+                            <input type="text" class="form-control" id="apellido">
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="email" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="email">
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="telefono" class="form-label">Teléfono</label>
+                            <input type="tel" class="form-control" id="telefono">
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="direccion" class="form-label">Dirección</label>
+                            <input type="text" class="form-control" id="direccion">
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-success" onclick="guardarCliente()">
+                    <i class="bi bi-save"></i> Guardar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para ver detalles del cliente -->
+<div class="modal fade" id="modalDetalles" tabindex="-1" aria-labelledby="modalDetallesLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-info text-white">
+                <h5 class="modal-title" id="modalDetallesLabel">Detalles del Cliente</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="detallesCliente">
+                <!-- Se llenará dinámicamente -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Cargar clientes al iniciar
+    document.addEventListener('DOMContentLoaded', function() {
+        cargarClientes();
+    });
+
+    // Función para cargar todos los clientes
+    function cargarClientes() {
+        fetch('/clientes/api')
+            .then(response => {
+                console.log('Status carga clientes:', response.status);
+                if (!response.ok) throw new Error('Error al cargar clientes: ' + response.status);
+                return response.json();
+            })
+            .then(clientes => {
+                console.log('Clientes cargados:', clientes);
+                mostrarClientes(clientes);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                mostrarAlerta('Error al cargar clientes: ' + error.message, 'danger');
+            });
+    }
+
+    // Mostrar clientes en la tabla
+    function mostrarClientes(clientes) {
+        const tbody = document.getElementById('tablaClientes');
+
+        if (clientes.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="7" class="text-center">No se encontraron clientes</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = clientes.map(cliente => `
+            <tr>
+                <td>${cliente.id || 'N/A'}</td>
+                <td>${cliente.documento || ''}</td>
+                <td>${cliente.nombre || ''} ${cliente.apellido || ''}</td>
+                <td>${cliente.email || ''}</td>
+                <td>${cliente.telefono || 'N/A'}</td>
+                <td>${cliente.direccion || 'N/A'}</td>
+                <td>
+                    <button class="btn btn-sm btn-info btn-action" onclick="verCliente(${cliente.id})" title="Ver">
+                        <i class="bi bi-eye"></i>
+                    </button>
+                    <button class="btn btn-sm btn-warning btn-action" onclick="editarCliente(${cliente.id})" title="Editar">
+                        <i class="bi bi-pencil"></i>
+                    </button>
+                    <button class="btn btn-sm btn-danger btn-action" onclick="eliminarCliente(${cliente.id})" title="Eliminar">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    // Guardar cliente (crear o actualizar)
+    function guardarCliente() {
+        const id = document.getElementById('clienteId').value;
+        const documento = document.getElementById('documento').value;
+        const nombre = document.getElementById('nombre').value;
+        const apellido = document.getElementById('apellido').value;
+        const email = document.getElementById('email').value;
+        const telefono = document.getElementById('telefono').value;
+        const direccion = document.getElementById('direccion').value;
+
+        // Validaciones
+        if (!documento || !nombre) {
+            mostrarAlerta('Documento y Nombre son obligatorios', 'warning');
+            return;
+        }
+
+        const cliente = {
+            documento: documento,
+            nombre: nombre,
+            apellido: apellido,  // ✅ AGREGADO campo apellido
+            email: email,
+            telefono: telefono,
+            direccion: direccion
+        };
+
+        const url = id ? `/clientes/api/${id}` : '/clientes/api';
+        const method = id ? 'PUT' : 'POST';
+
+        console.log('Enviando cliente:', cliente);
+        console.log('URL:', url, 'Method:', method);
+
+        fetch(url, {
+            method: method,
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(cliente)
+        })
+            .then(response => {
+                console.log('Response status:', response.status);
+
+                if (!response.ok) {
+                    return response.text().then(errorText => {
+                        console.error('Error response:', errorText);
+                        throw new Error(`Error ${response.status}: ${errorText}`);
+                    });
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Cliente guardado exitosamente:', data);
+                mostrarAlerta('Cliente guardado exitosamente', 'success');
+                bootstrap.Modal.getInstance(document.getElementById('modalCliente')).hide();
+                cargarClientes();
+                document.getElementById('formCliente').reset();
+            })
+            .catch(error => {
+                console.error('Error completo:', error);
+                mostrarAlerta(`Error al guardar: ${error.message}`, 'danger');
+            });
+    }
+
+    // Ver detalles del cliente
+    function verCliente(id) {
+        fetch(`/clientes/api/${id}`)
+            .then(response => {
+                if (!response.ok) throw new Error('Cliente no encontrado');
+                return response.json();
+            })
+            .then(cliente => {
+                document.getElementById('detallesCliente').innerHTML = `
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <strong>ID:</strong> ${cliente.id}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <strong>Documento:</strong> ${cliente.documento}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <strong>Nombre:</strong> ${cliente.nombre || ''}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <strong>Apellido:</strong> ${cliente.apellido || 'N/A'}
+                        </div>
+                        <div class="col-12 mb-3">
+                            <strong>Email:</strong> ${cliente.email || 'N/A'}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <strong>Teléfono:</strong> ${cliente.telefono || 'N/A'}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <strong>Fecha Registro:</strong> ${cliente.fechaRegistro ? new Date(cliente.fechaRegistro).toLocaleString() : 'N/A'}
+                        </div>
+                        <div class="col-12 mb-3">
+                            <strong>Dirección:</strong> ${cliente.direccion || 'N/A'}
+                        </div>
+                    </div>
+                `;
+                new bootstrap.Modal(document.getElementById('modalDetalles')).show();
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                mostrarAlerta('Error al cargar el cliente', 'danger');
+            });
+    }
+
+    // Editar cliente
+    function editarCliente(id) {
+        fetch(`/clientes/api/${id}`)
+            .then(response => {
+                if (!response.ok) throw new Error('Cliente no encontrado');
+                return response.json();
+            })
+            .then(cliente => {
+                document.getElementById('clienteId').value = cliente.id;
+                document.getElementById('documento').value = cliente.documento;
+                document.getElementById('nombre').value = cliente.nombre;
+                document.getElementById('apellido').value = cliente.apellido || '';  // ✅ AGREGADO
+                document.getElementById('email').value = cliente.email || '';
+                document.getElementById('telefono').value = cliente.telefono || '';
+                document.getElementById('direccion').value = cliente.direccion || '';
+
+                document.getElementById('modalClienteLabel').textContent = 'Editar Cliente';
+                document.getElementById('documento').disabled = true;
+
+                new bootstrap.Modal(document.getElementById('modalCliente')).show();
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                mostrarAlerta('Error al cargar el cliente', 'danger');
+            });
+    }
+
+    // Eliminar cliente
+    function eliminarCliente(id) {
+        if (confirm('¿Está seguro de eliminar este cliente?')) {
+            fetch(`/clientes/api/${id}`, {
+                method: 'DELETE'
+            })
+                .then(response => {
+                    if (response.ok) {
+                        mostrarAlerta('Cliente eliminado exitosamente', 'success');
+                        cargarClientes();
+                    } else {
+                        throw new Error('Error al eliminar');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    mostrarAlerta('Error al eliminar el cliente', 'danger');
+                });
+        }
+    }
+
+    // Buscar por nombre
+    function buscarPorNombre() {
+        const nombre = document.getElementById('searchNombre').value;
+
+        if (!nombre.trim()) {
+            mostrarAlerta('Ingrese un nombre para buscar', 'warning');
+            return;
+        }
+
+        fetch(`/clientes/api/buscar?nombre=${encodeURIComponent(nombre)}`)
+            .then(response => {
+                if (!response.ok) throw new Error('Error en búsqueda');
+                return response.json();
+            })
+            .then(clientes => {
+                mostrarClientes(clientes);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                mostrarAlerta('Error al buscar clientes', 'danger');
+            });
+    }
+
+    // Buscar por documento
+    function buscarPorDocumento() {
+        const documento = document.getElementById('searchDocumento').value;
+
+        if (!documento.trim()) {
+            mostrarAlerta('Ingrese un documento para buscar', 'warning');
+            return;
+        }
+
+        fetch(`/clientes/api/documento/${encodeURIComponent(documento)}`)
+            .then(response => {
+                if (!response.ok) throw new Error('Cliente no encontrado');
+                return response.json();
+            })
+            .then(cliente => {
+                mostrarClientes([cliente]);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                mostrarAlerta('Cliente no encontrado', 'warning');
+            });
+    }
+
+    // Limpiar formulario
+    function limpiarFormulario() {
+        document.getElementById('formCliente').reset();
+        document.getElementById('clienteId').value = '';
+        document.getElementById('modalClienteLabel').textContent = 'Nuevo Cliente';
+        document.getElementById('documento').disabled = false;
+    }
+
+    // Mostrar alertas
+    function mostrarAlerta(mensaje, tipo) {
+        const alertDiv = document.createElement('div');
+        alertDiv.className = `alert alert-${tipo} alert-dismissible fade show position-fixed top-0 start-50 translate-middle-x mt-3`;
+        alertDiv.style.zIndex = '9999';
+        alertDiv.innerHTML = `
+            ${mensaje}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        document.body.appendChild(alertDiv);
+
+        setTimeout(() => {
+            alertDiv.remove();
+        }, 3000);
+    }
+
+    // Permitir buscar con Enter
+    document.getElementById('searchNombre')?.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            buscarPorNombre();
+        }
+    });
+
+    document.getElementById('searchDocumento')?.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            buscarPorDocumento();
+        }
+    });
+</script>
+</body>
+</html>

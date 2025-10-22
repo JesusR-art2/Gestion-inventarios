@@ -17,7 +17,7 @@ public class Cliente {
     private Long id;
 
     @Column(unique = true, nullable = false)
-    private String dni;
+    private String documento;
 
     @Column(nullable = false)
     private String nombre;
@@ -50,12 +50,12 @@ public class Cliente {
         this.direccion = direccion;
     }
 
-    public String getDni() {
-        return dni;
+    public String getDocumento() {
+        return documento;
     }
 
-    public void setDni(String dni) {
-        this.dni = dni;
+    public void setDocumento(String documento) {
+        this.documento = documento;
     }
 
     public String getEmail() {

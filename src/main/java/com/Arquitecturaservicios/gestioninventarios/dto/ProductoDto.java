@@ -2,7 +2,7 @@ package com.Arquitecturaservicios.gestioninventarios.dto;
 
 import lombok.*;
 
-@RequiredArgsConstructor
+
 @AllArgsConstructor
 @NoArgsConstructor
  public class ProductoDto {
@@ -60,4 +60,6 @@ import lombok.*;
     public void setStock(Integer stock) {
         this.stock = stock;
     }
+
+
 }
