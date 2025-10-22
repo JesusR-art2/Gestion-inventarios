@@ -1,5 +1,8 @@
 package com.Arquitecturaservicios.gestioninventarios.Entities;
 
-enum EstadoVenta {
-    PENDIENTE, COMPLETADA, CANCELADA
+public enum EstadoVenta {
+    PENDIENTE,
+    COMPLETADA,
+    CANCELADA,
+    EN_PROCESO
 }

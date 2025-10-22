@@ -1,34 +1,18 @@
-package com.Arquitecturaservicios.gestioninventarios.Entities;
+package com.Arquitecturaservicios.gestioninventarios.dto;
 
-import jakarta.persistence.*;
+import com.Arquitecturaservicios.gestioninventarios.Entities.Productos;
+import com.Arquitecturaservicios.gestioninventarios.Entities.Venta;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 
-@Entity
-@Table(name = "detalle_venta")
 @AllArgsConstructor
 @NoArgsConstructor
-public class DetalleVenta {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+public class DetalleVentaDto {
     private Long id;
-
-    @ManyToOne
-    @JoinColumn(name = "venta_id")
-    private Venta venta;
-
-    @ManyToOne
-    @JoinColumn(name = "producto_id")
-    private Productos productoid;
-
-    @Column(nullable = false)
+    private Long ventaId;
+    private Long productoid;
     private Integer cantidad;
-
-    @Column(nullable = false)
     private Double precioUnitario;
-
-    @Column(nullable = false)
     private Double subtotal;
 
     public Integer getCantidad() {
@@ -55,6 +39,13 @@ public class DetalleVenta {
         this.precioUnitario = precioUnitario;
     }
 
+    public Long getProductoid() {
+        return productoid;
+    }
+
+    public void setProductoid(Long productoid) {
+        this.productoid = productoid;
+    }
 
     public Double getSubtotal() {
         return subtotal;
@@ -64,19 +55,11 @@ public class DetalleVenta {
         this.subtotal = subtotal;
     }
 
-    public Venta getVenta() {
-        return venta;
+    public Long getVentaId() {
+        return ventaId;
     }
 
-    public void setVenta(Venta venta) {
-        this.venta = venta;
-    }
-
-    public Productos getProductoid() {
-        return productoid;
-    }
-
-    public void setProductoid(Productos productoid) {
-        this.productoid = productoid;
+    public void setVentaId(Long ventaId) {
+        this.ventaId = ventaId;
     }
 }

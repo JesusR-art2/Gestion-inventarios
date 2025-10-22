@@ -1,4 +1,5 @@
 package com.Arquitecturaservicios.gestioninventarios.Config;
+import com.Arquitecturaservicios.gestioninventarios.dto.VentaDto;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -38,6 +39,7 @@ public class BuildObjectMapper {
         Map<String, Object> baseMap = getObjectMapper().convertValue(reference, Map.class);
         return getObjectMapper().convertValue(baseMap, toConverter);
     }
+
 
     public <T> T getObjectForUpdate(T baseObject, Map<String, Object> dataUpdate) {
         Map<String, Object> baseMap = getObjectMapper().convertValue(baseObject, Map.class);

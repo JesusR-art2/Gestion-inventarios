@@ -1,54 +1,43 @@
-package com.Arquitecturaservicios.gestioninventarios.Entities;
+package com.Arquitecturaservicios.gestioninventarios.dto;
 
+import com.Arquitecturaservicios.gestioninventarios.Entities.Cliente;
+import com.Arquitecturaservicios.gestioninventarios.Entities.DetalleVenta;
+import com.Arquitecturaservicios.gestioninventarios.Entities.EstadoVenta;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
-
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
-@Entity
-@Table(name = "ventas")
 @AllArgsConstructor
 @NoArgsConstructor
-public class Venta {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+@Getter
+@Setter
+public class VentaDto {
     private Long id;
-
-    @Column(unique = true, nullable = false)
     private String numeroFactura;
-
-    @ManyToOne
-    @JoinColumn(name = "cliente_id", nullable = false)
-    private Cliente cliente;
-
-    @Column(nullable = false)
+    private Long clienteId;
     private LocalDateTime fechaVenta;
-
-    @Column(nullable = false)
     private Double total;
-
-    @Enumerated(EnumType.STRING)
     private EstadoVenta estado;
+    private List<DetalleVentaDto> detalles;
 
-    @OneToMany(mappedBy = "venta", cascade = CascadeType.ALL)
-    private List<DetalleVenta> detalles;
-
-    public Cliente getCliente() {
-        return cliente;
+    public Long getClienteId() {
+        return clienteId;
     }
 
-    public void setCliente(Cliente cliente) {
-        this.cliente = cliente;
+    public void setClienteId(Long clienteId) {
+        this.clienteId = clienteId;
     }
 
-    public List<DetalleVenta> getDetalles() {
+    public List<DetalleVentaDto> getDetalles() {
         return detalles;
     }
 
-    public void setDetalles(List<DetalleVenta> detalles) {
+    public void setDetalles(List<DetalleVentaDto> detalles) {
         this.detalles = detalles;
     }
 
@@ -91,9 +80,4 @@ public class Venta {
     public void setTotal(Double total) {
         this.total = total;
     }
-
-    // Getters and Setters
 }
-
-
-
