@@ -69,7 +69,14 @@ public class ProductoService {
     @Transactional
     public Page<ProductoDto> findAll(Pageable pageable) {
         return productosRepository.findAll(pageable)
-                .map(producto -> BuildObjectMapper.converterTo(producto, ProductoDto.class));
+                .map(producto -> {
+                    ProductoDto dto = BuildObjectMapper.converterTo(producto, ProductoDto.class);
+                    // Asegurar que el ID se mapee correctamente
+                    if (dto.getId() == null && producto.getId() != null) {
+                        dto.setId(producto.getId());
+                    }
+                    return dto;
+                });
     }
     @Transactional
     public List<ProductoDto> findByMarcaContaining(String marca) {
@@ -90,6 +97,14 @@ public class ProductoService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                         "Producto con ID " + id + " no encontrado"));
     }
+    @Transactional
+    public ProductoDto findByCodigo(Integer codigo) {
+        return productosRepository.findByCodigo(codigo)
+                .map(producto -> BuildObjectMapper.converterTo(producto, ProductoDto.class))
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "Producto con ID " + codigo + " no encontrado"));
+    }
+
 
 
     public void deleteByCodigo(Integer codigo) {

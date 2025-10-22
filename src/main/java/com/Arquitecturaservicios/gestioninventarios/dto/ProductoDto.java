@@ -6,11 +6,20 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
  public class ProductoDto {
+    private Long id;
     private String nombre;
     private Integer codigo;
     private String marca;
     private Double precio;
     private Integer stock;
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
 
     public Integer getCodigo() {
         return codigo;

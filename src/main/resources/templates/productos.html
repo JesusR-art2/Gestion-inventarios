@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Inventarios - Productos</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .card {
+            box-shadow: 0 0.125rem 0.25rem rgba(0,0,0,0.075);
+            margin-bottom: 1.5rem;
+        }
+        .table-hover tbody tr:hover {
+            background-color: #f1f3f5;
+        }
+        .btn-action {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.875rem;
+        }
+    </style>
+</head>
+<body>
+<nav class="navbar navbar-dark bg-primary">
+    <div class="container-fluid">
+            <span class="navbar-brand mb-0 h1">
+                <i class="bi bi-box-seam"></i> Sistema de Gestión de Inventarios
+            </span>
+    </div>
+</nav>
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <h2 class="mb-4">Gestión de Productos</h2>
+        </div>
+    </div>
+
+    <!-- Botón para abrir modal de crear producto -->
+    <div class="row mb-3">
+        <div class="col-12">
+            <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalProducto" onclick="limpiarFormulario()">
+                <i class="bi bi-plus-circle"></i> Nuevo Producto
+            </button>
+        </div>
+    </div>
+
+    <!-- Buscador por marca -->
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Buscar por Marca</h5>
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="searchMarca" placeholder="Ingrese marca...">
+                        <button class="btn btn-primary" type="button" onclick="buscarPorMarca()">
+                            <i class="bi bi-search"></i> Buscar
+                        </button>
+                        <button class="btn btn-secondary" type="button" onclick="cargarProductos()">
+                            <i class="bi bi-arrow-clockwise"></i> Mostrar Todos
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabla de productos -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Lista de Productos</h5>
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                            <tr>
+                                <th>ID</th>
+                                <th>Código</th>
+                                <th>Nombre</th>
+                                <th>Marca</th>
+                                <th>Precio</th>
+                                <th>Stock</th>
+                                <th>Acciones</th>
+                            </tr>
+                            </thead>
+                            <tbody id="tablaProductos">
+                            <tr>
+                                <td colspan="7" class="text-center">
+                                    <div class="spinner-border text-primary" role="status">
+                                        <span class="visually-hidden">Cargando...</span>
+                                    </div>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Paginación -->
+                    <nav aria-label="Navegación de páginas">
+                        <ul class="pagination justify-content-center" id="paginacion">
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para crear/editar producto -->
+<div class="modal fade" id="modalProducto" tabindex="-1" aria-labelledby="modalProductoLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalProductoLabel">Nuevo Producto</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="formProducto">
+                    <input type="hidden" id="productoId">
+
+                    <div class="mb-3">
+                        <label for="codigo" class="form-label">Código *</label>
+                        <input type="number" class="form-control" id="codigo" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="nombre" class="form-label">Nombre *</label>
+                        <input type="text" class="form-control" id="nombre" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="marca" class="form-label">Marca *</label>
+                        <input type="text" class="form-control" id="marca" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="precio" class="form-label">Precio *</label>
+                        <input type="number" step="0.01" class="form-control" id="precio" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="stock" class="form-label">Stock *</label>
+                        <input type="number" class="form-control" id="stock" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="descripcion" class="form-label">Descripción</label>
+                        <textarea class="form-control" id="descripcion" rows="3"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="guardarProducto()">Guardar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    let paginaActual = 0;
+    let tamañoPagina = 10;
+    let totalPaginas = 0;
+
+    // Cargar productos al iniciar
+    document.addEventListener('DOMContentLoaded', function() {
+        cargarProductos();
+    });
+
+    // Función para cargar productos paginados
+    function cargarProductos(page = 0) {
+        paginaActual = page;
+        fetch(`/productos/paginados?page=${page}&size=${tamañoPagina}&sortBy=id&sortDirection=asc`)
+            .then(response => response.json())
+            .then(data => {
+                mostrarProductos(data.content);
+                totalPaginas = data.totalPages;
+                crearPaginacion(data);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                mostrarAlerta('Error al cargar productos', 'danger');
+            });
+    }
+
+    // Mostrar productos en la tabla
+    function mostrarProductos(productos) {
+        const tbody = document.getElementById('tablaProductos');
+
+        if (productos.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="7" class="text-center">No se encontraron productos</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = productos.map(producto => {
+            console.log('Producto:', producto); // Para debug
+            const id = producto.id || producto.idProducto || producto.codigo;
+            return `
+                <tr>
+                    <td>${id || 'N/A'}</td>
+                    <td>${producto.codigo || ''}</td>
+                    <td>${producto.nombre || ''}</td>
+                    <td>${producto.marca || ''}</td>
+                    <td>${producto.precio ? producto.precio.toFixed(2) : '0.00'}</td>
+                    <td>${producto.stock || 0}</td>
+                    <td>
+                        <button class="btn btn-sm btn-info btn-action" onclick="verProducto(${producto.codigo})" title="Ver">
+                            <i class="bi bi-eye"></i>
+                        </button>
+                        <button class="btn btn-sm btn-warning btn-action" onclick="editarProducto(${producto.codigo})" title="Editar">
+                            <i class="bi bi-pencil"></i>
+                        </button>
+                        <button class="btn btn-sm btn-danger btn-action" onclick="eliminarProductoByCodigo(${producto.codigo})" title="Eliminar">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+                `;
+        }).join('');
+    }
+
+    // Crear paginación
+    function crearPaginacion(data) {
+        const paginacion = document.getElementById('paginacion');
+        let html = '';
+
+        // Botón anterior
+        html += `
+                <li class="page-item ${data.first ? 'disabled' : ''}">
+                    <a class="page-link" href="#" onclick="cargarProductos(${paginaActual - 1}); return false;">Anterior</a>
+                </li>
+            `;
+
+        // Números de página
+        for (let i = 0; i < data.totalPages; i++) {
+            html += `
+                    <li class="page-item ${i === paginaActual ? 'active' : ''}">
+                        <a class="page-link" href="#" onclick="cargarProductos(${i}); return false;">${i + 1}</a>
+                    </li>
+                `;
+        }
+
+        // Botón siguiente
+        html += `
+                <li class="page-item ${data.last ? 'disabled' : ''}">
+                    <a class="page-link" href="#" onclick="cargarProductos(${paginaActual + 1}); return false;">Siguiente</a>
+                </li>
+            `;
+
+        paginacion.innerHTML = html;
+    }
+
+    // Guardar producto (crear o actualizar)
+    function guardarProducto() {
+        const id = document.getElementById('productoId').value;
+        const codigo = document.getElementById('codigo').value;
+        const nombre = document.getElementById('nombre').value;
+        const marca = document.getElementById('marca').value;
+        const precio = document.getElementById('precio').value;
+        const stock = document.getElementById('stock').value;
+        const descripcion = document.getElementById('descripcion').value;
+
+        const producto = {
+            codigo: parseInt(codigo),
+            nombre: nombre,
+            marca: marca,
+            precio: parseFloat(precio),
+            stock: parseInt(stock),
+            descripcion: descripcion
+        };
+
+        const url = id ? `/productos/${codigo}` : '/productos/save';
+        const method = id ? 'PUT' : 'POST';
+
+        const body = id ? {
+            nombre: nombre,
+            marca: marca,
+            precio: parseFloat(precio),
+            stock: parseInt(stock),
+            descripcion: descripcion
+        } : producto;
+
+        fetch(url, {
+            method: method,
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(body)
+        })
+            .then(response => {
+                if (!response.ok) throw new Error('Error al guardar');
+                return response.json();
+            })
+            .then(data => {
+                mostrarAlerta('Producto guardado exitosamente', 'success');
+                bootstrap.Modal.getInstance(document.getElementById('modalProducto')).hide();
+                cargarProductos(paginaActual);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                mostrarAlerta('Error al guardar el producto', 'danger');
+            });
+    }
+
+    // Ver producto por código
+    function verProducto(codigo) {
+        fetch(`/productos/codigo/${codigo}`)
+            .then(response => response.json())
+            .then(producto => {
+                alert(`
+Información del Producto:
+ID: ${producto.id || producto.idProducto || 'N/A'}
+Código: ${producto.codigo}
+Nombre: ${producto.nombre}
+Marca: ${producto.marca}
+Precio: ${producto.precio}
+Stock: ${producto.stock}
+Descripción: ${producto.descripcion || 'N/A'}
+                    `);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                mostrarAlerta('Error al cargar el producto', 'danger');
+            });
+    }
+
+    // Editar producto
+    function editarProducto(codigo) {
+        fetch(`/productos/codigo/${codigo}`)
+            .then(response => response.json())
+            .then(producto => {
+                document.getElementById('productoId').value = producto.id || producto.idProducto || '';
+                document.getElementById('codigo').value = producto.codigo;
+                document.getElementById('nombre').value = producto.nombre;
+                document.getElementById('marca').value = producto.marca;
+                document.getElementById('precio').value = producto.precio;
+                document.getElementById('stock').value = producto.stock;
+                document.getElementById('descripcion').value = producto.descripcion || '';
+
+                document.getElementById('modalProductoLabel').textContent = 'Editar Producto';
+                document.getElementById('codigo').disabled = true;
+
+                new bootstrap.Modal(document.getElementById('modalProducto')).show();
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                mostrarAlerta('Error al cargar el producto', 'danger');
+            });
+    }
+
+    // Eliminar producto por código
+    function eliminarProductoByCodigo(codigo) {
+        if (confirm('¿Está seguro de eliminar este producto?')) {
+            fetch(`/productos/codigo/${codigo}`, {
+                method: 'DELETE'
+            })
+                .then(response => {
+                    if (response.ok || response.status === 204) {
+                        mostrarAlerta('Producto eliminado exitosamente', 'success');
+                        cargarProductos(paginaActual);
+                    } else {
+                        throw new Error('Error al eliminar');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    mostrarAlerta('Error al eliminar el producto', 'danger');
+                });
+        }
+    }
+
+    // Buscar por marca
+    function buscarPorMarca() {
+        const marca = document.getElementById('searchMarca').value;
+
+        if (!marca.trim()) {
+            mostrarAlerta('Ingrese una marca para buscar', 'warning');
+            return;
+        }
+
+        fetch(`/productos/buscar/marca?marca=${encodeURIComponent(marca)}`)
+            .then(response => response.json())
+            .then(productos => {
+                mostrarProductos(productos);
+                document.getElementById('paginacion').innerHTML = '';
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                mostrarAlerta('Error al buscar productos', 'danger');
+            });
+    }
+
+    // Limpiar formulario
+    function limpiarFormulario() {
+        document.getElementById('formProducto').reset();
+        document.getElementById('productoId').value = '';
+        document.getElementById('modalProductoLabel').textContent = 'Nuevo Producto';
+        document.getElementById('codigo').disabled = false;
+    }
+
+    // Mostrar alertas
+    function mostrarAlerta(mensaje, tipo) {
+        const alertDiv = document.createElement('div');
+        alertDiv.className = `alert alert-${tipo} alert-dismissible fade show position-fixed top-0 start-50 translate-middle-x mt-3`;
+        alertDiv.style.zIndex = '9999';
+        alertDiv.innerHTML = `
+                ${mensaje}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+        document.body.appendChild(alertDiv);
+
+        setTimeout(() => {
+            alertDiv.remove();
+        }, 3000);
+    }
+</script>
+</body>
+</html>

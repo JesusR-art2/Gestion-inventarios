@@ -24,19 +24,26 @@ public class ProductosController {
     public ProductosController(ProductoService productoService) {
         this.productoService = productoService;
     }
+    @GetMapping
+    public String mostrarProductos() {
+        return "productos"; // retorna productos.html
+    }
 
     @PostMapping("/save")
+    @ResponseBody
     public ResponseEntity<ProductoDto> save( @RequestBody ProductoDto productoDto) {
         ProductoDto productoGuardado = productoService.save( productoDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(productoGuardado);
     }
 
     @PutMapping("/{codigo}")
+    @ResponseBody
     public ProductoDto updateByCodigo(@PathVariable("codigo") Integer codigo,
                                       @RequestBody Map<String,Object> mapDataUpdate){
         return productoService.updateByCodigo(codigo, mapDataUpdate);
     }
     @GetMapping("/paginados")
+    @ResponseBody
     public ResponseEntity<Page<ProductoDto>> getProductosPaginados(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
@@ -52,20 +59,37 @@ public class ProductosController {
         return ResponseEntity.ok(productos);
     }
     @GetMapping("/buscar/marca")
+    @ResponseBody
     public ResponseEntity<List<ProductoDto>> searchProductosByNombre(
             @RequestParam("marca") String marca) {
         List<ProductoDto> productos = productoService.findByMarcaContaining(marca);
         return ResponseEntity.ok(productos);
     }
     @GetMapping("/buscar/{id}")
+    @ResponseBody
     public ResponseEntity<ProductoDto> getProductoById(
             @PathVariable("id") Long id) {
         ProductoDto producto = productoService.findById(id);
         return ResponseEntity.ok(producto);
     }
+
+    @GetMapping("/codigo/{codigo}")
+    @ResponseBody
+    public ResponseEntity<ProductoDto> getProductoByCodigo(
+            @PathVariable("codigo") Integer codigo) {
+        ProductoDto producto = productoService.findByCodigo(codigo);
+        return ResponseEntity.ok(producto);
+    }
     @DeleteMapping("/{id}")
+    @ResponseBody
     public ResponseEntity<Void> deleteProductoById(@PathVariable("id") Long id) {
         productoService.deleteById(id);
+        return ResponseEntity.noContent().build();
+    }
+    @DeleteMapping("/codigo/{codigo}")
+    @ResponseBody
+    public ResponseEntity<Void> deleteProductoByCodigo(@PathVariable("codigo") Integer codigo) {
+        productoService.deleteByCodigo(codigo);
         return ResponseEntity.noContent().build();
     }
 }
