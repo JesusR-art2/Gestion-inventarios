@@ -1,7 +1,5 @@
 package com.Arquitecturaservicios.gestioninventarios.dto;
 
-import com.Arquitecturaservicios.gestioninventarios.Entities.Productos;
-import com.Arquitecturaservicios.gestioninventarios.Entities.Venta;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 

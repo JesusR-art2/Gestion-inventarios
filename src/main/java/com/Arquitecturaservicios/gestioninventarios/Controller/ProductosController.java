@@ -2,7 +2,6 @@ package com.Arquitecturaservicios.gestioninventarios.Controller;
 
 import com.Arquitecturaservicios.gestioninventarios.Service.ProductoService;
 import com.Arquitecturaservicios.gestioninventarios.dto.ProductoDto;
-import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -12,11 +11,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
-import java.security.Principal;
 import java.util.List;
 import java.util.Map;
 
-@Controller
+@RestController
 @RequestMapping("/productos")
 public class ProductosController {
     private final ProductoService productoService;
@@ -24,19 +22,14 @@ public class ProductosController {
     public ProductosController(ProductoService productoService) {
         this.productoService = productoService;
     }
-    @GetMapping
-    public String mostrarProductos() {
-        return "productos"; // retorna productos.html
-    }
-
-    @PostMapping("/save")
+    @PostMapping
     @ResponseBody
     public ResponseEntity<ProductoDto> save( @RequestBody ProductoDto productoDto) {
         ProductoDto productoGuardado = productoService.save( productoDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(productoGuardado);
     }
 
-    @PutMapping("/{codigo}")
+    @PatchMapping("/codigo/{codigo}")
     @ResponseBody
     public ProductoDto updateByCodigo(@PathVariable("codigo") Integer codigo,
                                       @RequestBody Map<String,Object> mapDataUpdate){
@@ -65,7 +58,7 @@ public class ProductosController {
         List<ProductoDto> productos = productoService.findByMarcaContaining(marca);
         return ResponseEntity.ok(productos);
     }
-    @GetMapping("/buscar/{id}")
+    @GetMapping("/{id}")
     @ResponseBody
     public ResponseEntity<ProductoDto> getProductoById(
             @PathVariable("id") Long id) {

@@ -1,5 +1,4 @@
 package com.Arquitecturaservicios.gestioninventarios.Config;
-import com.Arquitecturaservicios.gestioninventarios.dto.VentaDto;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;

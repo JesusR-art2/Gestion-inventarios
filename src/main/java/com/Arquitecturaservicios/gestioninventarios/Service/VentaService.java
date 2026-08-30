@@ -8,8 +8,8 @@ import com.Arquitecturaservicios.gestioninventarios.Entities.EstadoVenta;
 import com.Arquitecturaservicios.gestioninventarios.Repository.VentaRepository;
 import com.Arquitecturaservicios.gestioninventarios.Repository.ClienteRepository;
 import com.Arquitecturaservicios.gestioninventarios.dto.VentaDto;
-import com.Arquitecturaservicios.gestioninventarios.dto.DetalleVentaDto;
-import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,6 +24,7 @@ import java.util.stream.Collectors;
 @Service
 @Transactional
 public class VentaService {
+    private static final Logger logger = LoggerFactory.getLogger(VentaService.class);
     private final VentaRepository ventaRepository;
     private final ClienteRepository clienteRepository;
     private final BuildObjectMapper modelMapper;
@@ -35,126 +36,94 @@ public class VentaService {
     }
 
     public VentaDto save(VentaDto dto) {
-        try {
-            System.out.println("=== CREANDO VENTA ===");
-            System.out.println("Número Factura: " + dto.getNumeroFactura());
-            System.out.println("Cliente ID: " + dto.getClienteId());
-            System.out.println("Total: " + dto.getTotal());
+        logger.info("Creando venta - Factura: {}, Cliente ID: {}, Total: {}", 
+                dto.getNumeroFactura(), dto.getClienteId(), dto.getTotal());
 
-            // Validar número de factura único
-            if (ventaRepository.findByNumeroFactura(dto.getNumeroFactura()).isPresent()) {
-                throw new ResponseStatusException(HttpStatus.CONFLICT,
-                        "Ya existe una venta con el número de factura: " + dto.getNumeroFactura());
-            }
-
-            // Validar que el cliente existe
-            Cliente cliente = clienteRepository.findById(dto.getClienteId())
-                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                            "Cliente con ID " + dto.getClienteId() + " no encontrado"));
-
-            validarVenta(dto);
-
-            // Mapeo automático con valores por defecto
-            Map<String, Object> context = Map.of();
-            Venta venta = modelMapper.createEntityFromDto(dto, Venta.class, context);
-
-            // Establecer relaciones
-            venta.setCliente(cliente);
-            venta.setFechaVenta(LocalDateTime.now());
-            venta.setEstado(EstadoVenta.PENDIENTE);
-
-            // Procesar detalles de venta
-            if (dto.getDetalles() != null) {
-                List<DetalleVenta> detalles = dto.getDetalles().stream()
-                        .map(detalleDto -> {
-                            DetalleVenta detalle = modelMapper.createEntityFromDto(detalleDto, DetalleVenta.class, context);
-                            detalle.setVenta(venta);
-                            // Validar que el subtotal sea correcto
-                            if (detalle.getSubtotal() == null) {
-                                detalle.setSubtotal(detalle.getCantidad() * detalle.getPrecioUnitario());
-                            }
-                            return detalle;
-                        })
-                        .collect(Collectors.toList());
-                venta.setDetalles(detalles);
-            }
-
-            // Validar que el total coincida con la suma de los subtotales
-            if (venta.getDetalles() != null) {
-                double totalCalculado = venta.getDetalles().stream()
-                        .mapToDouble(DetalleVenta::getSubtotal)
-                        .sum();
-
-                if (Math.abs(totalCalculado - venta.getTotal()) > 0.01) {
-                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                            "El total de la venta no coincide con la suma de los detalles");
-                }
-            }
-
-            Venta guardada = ventaRepository.save(venta);
-            VentaDto resultado = modelMapper.converterTo(guardada, VentaDto.class);
-
-            System.out.println("Venta creada exitosamente: " + resultado.getId());
-            return resultado;
-
-        } catch (ResponseStatusException e) {
-            System.err.println("Error de validación: " + e.getReason());
-            throw e;
-        } catch (Exception e) {
-            System.err.println("Error inesperado al crear venta: " + e.getMessage());
-            e.printStackTrace();
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
-                    "Error interno al crear venta: " + e.getMessage());
+        if (ventaRepository.findByNumeroFactura(dto.getNumeroFactura()).isPresent()) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
+                    "Ya existe una venta con el número de factura: " + dto.getNumeroFactura());
         }
+
+        Cliente cliente = clienteRepository.findById(dto.getClienteId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "Cliente con ID " + dto.getClienteId() + " no encontrado"));
+
+        validarVenta(dto);
+
+        Map<String, Object> context = Map.of();
+        Venta venta = modelMapper.createEntityFromDto(dto, Venta.class, context);
+
+        venta.setCliente(cliente);
+        venta.setFechaVenta(LocalDateTime.now());
+        venta.setEstado(EstadoVenta.PENDIENTE);
+
+        if (dto.getDetalles() != null) {
+            List<DetalleVenta> detalles = dto.getDetalles().stream()
+                    .map(detalleDto -> {
+                        DetalleVenta detalle = modelMapper.createEntityFromDto(detalleDto, DetalleVenta.class, context);
+                        detalle.setVenta(venta);
+                        if (detalle.getSubtotal() == null) {
+                            detalle.setSubtotal(detalle.getCantidad() * detalle.getPrecioUnitario());
+                        }
+                        return detalle;
+                    })
+                    .collect(Collectors.toList());
+            venta.setDetalles(detalles);
+        }
+
+        if (venta.getDetalles() != null) {
+            double totalCalculado = venta.getDetalles().stream()
+                    .mapToDouble(DetalleVenta::getSubtotal)
+                    .sum();
+
+            if (Math.abs(totalCalculado - venta.getTotal()) > 0.01) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                        "El total de la venta no coincide con la suma de los detalles");
+            }
+        }
+
+        Venta guardada = ventaRepository.save(venta);
+        VentaDto resultado = modelMapper.converterTo(guardada, VentaDto.class);
+
+        logger.info("Venta creada exitosamente: ID {}", resultado.getId());
+        return resultado;
     }
 
     @Transactional
     public VentaDto update(Long id, Map<String, Object> dataUpdate) {
         return ventaRepository.findById(id).map(ventaExistente -> {
-            try {
-                System.out.println("=== ACTUALIZANDO VENTA ID: " + id + " ===");
-                System.out.println("Datos a actualizar: " + dataUpdate);
+            logger.info("Actualizando venta ID: {}, datos: {}", id, dataUpdate);
 
-                // Validar que no se intente modificar una venta completada/cancelada
-                if (ventaExistente.getEstado() == EstadoVenta.COMPLETADA ||
-                        ventaExistente.getEstado() == EstadoVenta.CANCELADA) {
-                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                            "No se puede modificar una venta en estado: " + ventaExistente.getEstado());
-                }
-
-                // Actualización parcial automática
-                Venta ventaActualizada = modelMapper.getObjectForUpdate(ventaExistente, dataUpdate);
-
-                // Validar si se cambió el número de factura
-                if (dataUpdate.containsKey("numeroFactura") &&
-                        !ventaExistente.getNumeroFactura().equals(ventaActualizada.getNumeroFactura())) {
-                    validarNumeroFacturaUnico(ventaActualizada.getNumeroFactura());
-                }
-
-                // Validar cliente si se actualiza
-                if (dataUpdate.containsKey("clienteId")) {
-                    Long nuevoClienteId = Long.valueOf(dataUpdate.get("clienteId").toString());
-                    Cliente cliente = clienteRepository.findById(nuevoClienteId)
-                            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                                    "Cliente con ID " + nuevoClienteId + " no encontrado"));
-                    ventaActualizada.setCliente(cliente);
-                }
-
-                // Aplicar formato a campos de texto
-                if (ventaActualizada.getNumeroFactura() != null) {
-                    ventaActualizada.setNumeroFactura(ventaActualizada.getNumeroFactura().trim().toUpperCase());
-                }
-
-                Venta updated = ventaRepository.save(ventaActualizada);
-                VentaDto resultado = modelMapper.converterTo(updated, VentaDto.class);
-
-                System.out.println("Venta actualizada exitosamente");
-                return resultado;
-
-            } catch (Exception e) {
-                System.err.println("Error al actualizar venta: " + e.getMessage());
-                throw e;
+            if (ventaExistente.getEstado() == EstadoVenta.COMPLETADA ||
+                    ventaExistente.getEstado() == EstadoVenta.CANCELADA) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                        "No se puede modificar una venta en estado: " + ventaExistente.getEstado());
             }
+
+            Venta ventaActualizada = modelMapper.getObjectForUpdate(ventaExistente, dataUpdate);
+
+            if (dataUpdate.containsKey("numeroFactura") &&
+                    !ventaExistente.getNumeroFactura().equals(ventaActualizada.getNumeroFactura())) {
+                validarNumeroFacturaUnico(ventaActualizada.getNumeroFactura());
+            }
+
+            if (dataUpdate.containsKey("clienteId")) {
+                Long nuevoClienteId = Long.valueOf(dataUpdate.get("clienteId").toString());
+                Cliente cliente = clienteRepository.findById(nuevoClienteId)
+                        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                                "Cliente con ID " + nuevoClienteId + " no encontrado"));
+                ventaActualizada.setCliente(cliente);
+            }
+
+            if (ventaActualizada.getNumeroFactura() != null) {
+                ventaActualizada.setNumeroFactura(ventaActualizada.getNumeroFactura().trim().toUpperCase());
+            }
+
+            Venta updated = ventaRepository.save(ventaActualizada);
+            VentaDto resultado = modelMapper.converterTo(updated, VentaDto.class);
+
+            logger.info("Venta actualizada exitosamente: ID {}", id);
+            return resultado;
         }).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                 "Venta con ID " + id + " no encontrada"));
     }
@@ -164,7 +133,7 @@ public class VentaService {
         return ventaRepository.findById(id)
                 .map(venta -> {
                     VentaDto dto = modelMapper.converterTo(venta, VentaDto.class);
-                    System.out.println("Venta encontrada: " + dto.getNumeroFactura());
+                    logger.debug("Venta encontrada: {}", dto.getNumeroFactura());
                     return dto;
                 })
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
@@ -176,7 +145,7 @@ public class VentaService {
         return ventaRepository.findByNumeroFactura(numeroFactura.trim().toUpperCase())
                 .map(venta -> {
                     VentaDto dto = modelMapper.converterTo(venta, VentaDto.class);
-                    System.out.println("Venta encontrada por número de factura: " + dto.getNumeroFactura());
+                    logger.debug("Venta encontrada por número de factura: {}", dto.getNumeroFactura());
                     return dto;
                 })
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
@@ -190,7 +159,7 @@ public class VentaService {
                 .map(venta -> modelMapper.converterTo(venta, VentaDto.class))
                 .collect(Collectors.toList());
 
-        System.out.println("Total ventas encontradas: " + ventas.size());
+        logger.debug("Total ventas encontradas: {}", ventas.size());
         return ventas;
     }
 
@@ -201,7 +170,7 @@ public class VentaService {
                 .map(venta -> modelMapper.converterTo(venta, VentaDto.class))
                 .collect(Collectors.toList());
 
-        System.out.println("Ventas encontradas para cliente ID '" + clienteId + "': " + ventas.size());
+        logger.debug("Ventas encontradas para cliente ID '{}': {}", clienteId, ventas.size());
         return ventas;
     }
 
@@ -212,7 +181,7 @@ public class VentaService {
                 .map(venta -> BuildObjectMapper.converterTo(venta, VentaDto.class))
                 .collect(Collectors.toList());
 
-        System.out.println("Ventas encontradas con estado '" + estado + "': " + ventas.size());
+        logger.debug("Ventas encontradas con estado '{}': {}", estado, ventas.size());
         return ventas;
     }
 
@@ -223,7 +192,7 @@ public class VentaService {
                 .map(venta -> modelMapper.converterTo(venta, VentaDto.class))
                 .collect(Collectors.toList());
 
-        System.out.println("Ventas encontradas entre " + fechaInicio + " y " + fechaFin + ": " + ventas.size());
+        logger.debug("Ventas encontradas entre {} y {}: {}", fechaInicio, fechaFin, ventas.size());
         return ventas;
     }
 
@@ -232,43 +201,29 @@ public class VentaService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                         "Venta con ID " + id + " no encontrada"));
 
-        // Validar que no se eliminen ventas completadas
         if (venta.getEstado() == EstadoVenta.COMPLETADA) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     "No se puede eliminar una venta completada");
         }
 
-        try {
-            ventaRepository.deleteById(id);
-            System.out.println("Venta eliminada ID: " + id);
-        } catch (Exception e) {
-            System.err.println("Error al eliminar venta: " + e.getMessage());
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
-                    "Error al eliminar venta: " + e.getMessage());
-        }
+        ventaRepository.deleteById(id);
+        logger.info("Venta eliminada ID: {}", id);
     }
 
     @Transactional
     public VentaDto cambiarEstado(Long id, EstadoVenta nuevoEstado) {
         return ventaRepository.findById(id).map(venta -> {
-            try {
-                System.out.println("=== CAMBIANDO ESTADO VENTA ID: " + id + " ===");
-                System.out.println("Estado actual: " + venta.getEstado() + " -> Nuevo estado: " + nuevoEstado);
+            logger.info("Cambiando estado venta ID: {} - Estado actual: {} -> Nuevo estado: {}", 
+                    id, venta.getEstado(), nuevoEstado);
 
-                // Validaciones de transición de estado
-                validarTransicionEstado(venta.getEstado(), nuevoEstado);
+            validarTransicionEstado(venta.getEstado(), nuevoEstado);
 
-                venta.setEstado(nuevoEstado);
-                Venta actualizada = ventaRepository.save(venta);
-                VentaDto resultado = modelMapper.converterTo(actualizada, VentaDto.class);
+            venta.setEstado(nuevoEstado);
+            Venta actualizada = ventaRepository.save(venta);
+            VentaDto resultado = modelMapper.converterTo(actualizada, VentaDto.class);
 
-                System.out.println("Estado de venta actualizado exitosamente");
-                return resultado;
-
-            } catch (Exception e) {
-                System.err.println("Error al cambiar estado de venta: " + e.getMessage());
-                throw e;
-            }
+            logger.info("Estado de venta actualizado exitosamente: ID {}", id);
+            return resultado;
         }).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                 "Venta con ID " + id + " no encontrada"));
     }
@@ -294,7 +249,7 @@ public class VentaService {
                     "Número de factura solo puede contener letras, números y guiones");
         }
 
-        System.out.println("Venta validada correctamente");
+        logger.debug("Venta validada correctamente");
     }
 
     private void validarNumeroFacturaUnico(String numeroFactura) {

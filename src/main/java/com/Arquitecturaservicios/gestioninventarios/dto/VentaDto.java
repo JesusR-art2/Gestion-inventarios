@@ -1,9 +1,6 @@
 package com.Arquitecturaservicios.gestioninventarios.dto;
 
-import com.Arquitecturaservicios.gestioninventarios.Entities.Cliente;
-import com.Arquitecturaservicios.gestioninventarios.Entities.DetalleVenta;
 import com.Arquitecturaservicios.gestioninventarios.Entities.EstadoVenta;
-import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

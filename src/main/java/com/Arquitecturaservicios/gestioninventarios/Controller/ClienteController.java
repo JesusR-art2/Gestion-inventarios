@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
 
-@Controller
+@RestController
 @RequestMapping("/clientes")
 public class ClienteController {
     private final ClienteService clienteService;
@@ -18,54 +18,49 @@ public class ClienteController {
     public ClienteController(ClienteService clienteService) {
         this.clienteService = clienteService;
     }
-    @GetMapping
-    public String mostrarClientes() {
-        return "clientes"; // retorna productos.html
-    }
-
-    @PostMapping("/api")
+    @PostMapping
     @ResponseBody
     public ResponseEntity<ClienteDto> create(@RequestBody ClienteDto clienteDto) {
         ClienteDto saved = clienteService.save(clienteDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
 
-    @PutMapping("/api/{id}")
+    @PatchMapping("/{id}")
     @ResponseBody
     public ResponseEntity<ClienteDto> update(@PathVariable Long id, @RequestBody Map<String, Object> updates) {
         ClienteDto updated = clienteService.update(id, updates);
         return ResponseEntity.ok(updated);
     }
 
-    @GetMapping("/api")
+    @GetMapping
     @ResponseBody
     public ResponseEntity<List<ClienteDto>> findAll() {
         List<ClienteDto> clientes = clienteService.findAll();
         return ResponseEntity.ok(clientes);
     }
 
-    @GetMapping("/api/{id}")
+    @GetMapping("/{id}")
     @ResponseBody
     public ResponseEntity<ClienteDto> findById(@PathVariable Long id) {
         ClienteDto cliente = clienteService.findById(id);
         return ResponseEntity.ok(cliente);
     }
 
-    @GetMapping("/api/documento/{documento}")
+    @GetMapping("/documento/{documento}")
     @ResponseBody
     public ResponseEntity<ClienteDto> findByDocumento(@PathVariable String documento) {
         ClienteDto cliente = clienteService.findByDocumento(documento);
         return ResponseEntity.ok(cliente);
     }
 
-    @GetMapping("/api/buscar")
+    @GetMapping("/buscar")
     @ResponseBody
     public ResponseEntity<List<ClienteDto>> findByNombre(@RequestParam String nombre) {
         List<ClienteDto> clientes = clienteService.findByNombreContaining(nombre);
         return ResponseEntity.ok(clientes);
     }
 
-    @DeleteMapping("/api/{id}")
+    @DeleteMapping("/{id}")
     @ResponseBody
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         clienteService.deleteById(id);

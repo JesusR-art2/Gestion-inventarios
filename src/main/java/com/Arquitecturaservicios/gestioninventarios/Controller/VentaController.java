@@ -3,7 +3,6 @@ package com.Arquitecturaservicios.gestioninventarios.Controller;
 import com.Arquitecturaservicios.gestioninventarios.Service.VentaService;
 import com.Arquitecturaservicios.gestioninventarios.dto.VentaDto;
 import com.Arquitecturaservicios.gestioninventarios.Entities.EstadoVenta;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -14,7 +13,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
-@Controller
+@RestController
 @RequestMapping("/ventas")
 public class VentaController {
     private final VentaService ventaService;
@@ -23,14 +22,7 @@ public class VentaController {
         this.ventaService = ventaService;
     }
 
-    @GetMapping
-    public String mostrarVentas(Model model) {
-        List<VentaDto> ventas = ventaService.findAll();
-        model.addAttribute("ventas", ventas);
-        return "venta";
-    }
-
-    @PostMapping("/api")
+    @PostMapping
     @ResponseBody
     public ResponseEntity<VentaDto> create(@RequestBody VentaDto ventaDto) {
         try {
@@ -41,7 +33,7 @@ public class VentaController {
         }
     }
 
-    @PutMapping("/api/{id}")
+    @PatchMapping("/{id}")
     @ResponseBody
     public ResponseEntity<VentaDto> update(@PathVariable Long id, @RequestBody Map<String, Object> updates) {
         try {
@@ -52,7 +44,7 @@ public class VentaController {
         }
     }
 
-    @PatchMapping("/api/{id}/estado")
+    @PatchMapping("/{id}/estado")
     @ResponseBody
     public ResponseEntity<VentaDto> cambiarEstado(@PathVariable Long id, @RequestBody Map<String, String> request) {
         try {
@@ -64,14 +56,14 @@ public class VentaController {
         }
     }
 
-    @GetMapping("/api")
+    @GetMapping
     @ResponseBody
     public ResponseEntity<List<VentaDto>> findAll() {
         List<VentaDto> ventas = ventaService.findAll();
         return ResponseEntity.ok(ventas);
     }
 
-    @GetMapping("/api/{id}")
+    @GetMapping("/{id}")
     @ResponseBody
     public ResponseEntity<VentaDto> findById(@PathVariable Long id) {
         try {
@@ -82,7 +74,7 @@ public class VentaController {
         }
     }
 
-    @GetMapping("/api/factura/{numeroFactura}")
+    @GetMapping("/factura/{numeroFactura}")
     @ResponseBody
     public ResponseEntity<VentaDto> findByNumeroFactura(@PathVariable String numeroFactura) {
         try {
@@ -93,7 +85,7 @@ public class VentaController {
         }
     }
 
-    @GetMapping("/api/cliente/{clienteId}")
+    @GetMapping("/cliente/{clienteId}")
     @ResponseBody
     public ResponseEntity<List<VentaDto>> findByClienteId(@PathVariable Long clienteId) {
         try {
@@ -104,7 +96,7 @@ public class VentaController {
         }
     }
 
-    @GetMapping("/api/estado/{estado}")
+    @GetMapping("/estado/{estado}")
     @ResponseBody
     public ResponseEntity<List<VentaDto>> findByEstado(@PathVariable EstadoVenta estado) {
         try {
@@ -115,7 +107,7 @@ public class VentaController {
         }
     }
 
-    @GetMapping("/api/rango-fechas")
+    @GetMapping("/rango-fechas")
     @ResponseBody
     public ResponseEntity<List<VentaDto>> findByFechaVentaBetween(
             @RequestParam String fechaInicio,
@@ -130,7 +122,7 @@ public class VentaController {
         }
     }
 
-    @GetMapping("/api/total-periodo")
+    @GetMapping("/total-periodo")
     @ResponseBody
     public ResponseEntity<Double> getTotalVentasPorPeriodo(
             @RequestParam String fechaInicio,
@@ -145,7 +137,7 @@ public class VentaController {
         }
     }
 
-    @DeleteMapping("/api/{id}")
+    @DeleteMapping("/{id}")
     @ResponseBody
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         try {
@@ -156,7 +148,7 @@ public class VentaController {
         }
     }
 
-    @GetMapping("/api/existe-factura/{numeroFactura}")
+    @GetMapping("/existe-factura/{numeroFactura}")
     @ResponseBody
     public ResponseEntity<Boolean> existsByNumeroFactura(@PathVariable String numeroFactura) {
         try {
@@ -167,7 +159,7 @@ public class VentaController {
         }
     }
 
-    @GetMapping("/api/count")
+    @GetMapping("/count")
     @ResponseBody
     public ResponseEntity<Long> count() {
         try {

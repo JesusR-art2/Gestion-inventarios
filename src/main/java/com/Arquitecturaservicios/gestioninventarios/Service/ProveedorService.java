@@ -4,7 +4,8 @@ import com.Arquitecturaservicios.gestioninventarios.Config.BuildObjectMapper;
 import com.Arquitecturaservicios.gestioninventarios.Entities.Proveedor;
 import com.Arquitecturaservicios.gestioninventarios.Repository.ProveedorRepository;
 import com.Arquitecturaservicios.gestioninventarios.dto.ProveedorDto;
-import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,6 +19,7 @@ import java.util.stream.Collectors;
 @Service
 @Transactional
 public class ProveedorService {
+    private static final Logger logger = LoggerFactory.getLogger(ProveedorService.class);
     private final ProveedorRepository proveedorRepository;
     private final BuildObjectMapper modelMapper;
 
@@ -27,79 +29,53 @@ public class ProveedorService {
     }
 
     public ProveedorDto save(ProveedorDto dto) {
-        try {
-            System.out.println("=== CREANDO PROVEEDOR ===");
-            System.out.println("RUC: " + dto.getRuc());
-            System.out.println("Nombre: " + dto.getNombre());
-            System.out.println("Contacto: " + dto.getContacto());
+        logger.info("Creando proveedor - RUC: {}, Nombre: {}", dto.getRuc(), dto.getNombre());
 
-            // Validar RUC único
-            if (proveedorRepository.findByRuc(dto.getRuc()).isPresent()) {
-                throw new ResponseStatusException(HttpStatus.CONFLICT,
-                        "Ya existe un proveedor con el RUC: " + dto.getRuc());
-            }
-
-            validarProveedor(dto);
-
-            // Mapeo automático con valores por defecto
-            Map<String, Object> context = Map.of();
-            Proveedor proveedor = modelMapper.createEntityFromDto(dto, Proveedor.class, context);
-
-            Proveedor guardado = proveedorRepository.save(proveedor);
-            ProveedorDto resultado = modelMapper.converterTo(guardado, ProveedorDto.class);
-
-            System.out.println("Proveedor creado exitosamente: " + resultado.getId());
-            return resultado;
-
-        } catch (ResponseStatusException e) {
-            System.err.println("Error de validación: " + e.getReason());
-            throw e;
-        } catch (Exception e) {
-            System.err.println("Error inesperado al crear proveedor: " + e.getMessage());
-            e.printStackTrace();
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
-                    "Error interno al crear proveedor: " + e.getMessage());
+        if (proveedorRepository.findByRuc(dto.getRuc()).isPresent()) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
+                    "Ya existe un proveedor con el RUC: " + dto.getRuc());
         }
+
+        validarProveedor(dto);
+
+        Map<String, Object> context = Map.of();
+        Proveedor proveedor = modelMapper.createEntityFromDto(dto, Proveedor.class, context);
+
+        Proveedor guardado = proveedorRepository.save(proveedor);
+        ProveedorDto resultado = modelMapper.converterTo(guardado, ProveedorDto.class);
+
+        logger.info("Proveedor creado exitosamente: ID {}", resultado.getId());
+        return resultado;
     }
 
 
     @Transactional
     public ProveedorDto update(Long id, Map<String, Object> dataUpdate) {
         return proveedorRepository.findById(id).map(proveedorExistente -> {
-            try {
-                System.out.println("=== ACTUALIZANDO PROVEEDOR ID: " + id + " ===");
-                System.out.println("Datos a actualizar: " + dataUpdate);
+            logger.info("Actualizando proveedor ID: {}, datos: {}", id, dataUpdate);
 
-                // Actualización parcial automática
-                Proveedor proveedorActualizado = modelMapper.getObjectForUpdate(proveedorExistente, dataUpdate);
+            Proveedor proveedorActualizado = modelMapper.getObjectForUpdate(proveedorExistente, dataUpdate);
 
-                // Validar si se cambió el RUC
-                if (dataUpdate.containsKey("ruc") &&
-                        !proveedorExistente.getRuc().equals(proveedorActualizado.getRuc())) {
-                    validarRucUnico(proveedorActualizado.getRuc());
-                }
-
-                // Aplicar formato a campos de texto
-                if (proveedorActualizado.getNombre() != null) {
-                    proveedorActualizado.setNombre(proveedorActualizado.getNombre().trim());
-                }
-                if (proveedorActualizado.getContacto() != null) {
-                    proveedorActualizado.setContacto(proveedorActualizado.getContacto().trim());
-                }
-                if (proveedorActualizado.getEmail() != null) {
-                    proveedorActualizado.setEmail(proveedorActualizado.getEmail().trim().toLowerCase());
-                }
-
-                Proveedor updated = proveedorRepository.save(proveedorActualizado);
-                ProveedorDto resultado = modelMapper.converterTo(updated, ProveedorDto.class);
-
-                System.out.println("Proveedor actualizado exitosamente");
-                return resultado;
-
-            } catch (Exception e) {
-                System.err.println("Error al actualizar proveedor: " + e.getMessage());
-                throw e;
+            if (dataUpdate.containsKey("ruc") &&
+                    !proveedorExistente.getRuc().equals(proveedorActualizado.getRuc())) {
+                validarRucUnico(proveedorActualizado.getRuc());
             }
+
+            if (proveedorActualizado.getNombre() != null) {
+                proveedorActualizado.setNombre(proveedorActualizado.getNombre().trim());
+            }
+            if (proveedorActualizado.getContacto() != null) {
+                proveedorActualizado.setContacto(proveedorActualizado.getContacto().trim());
+            }
+            if (proveedorActualizado.getEmail() != null) {
+                proveedorActualizado.setEmail(proveedorActualizado.getEmail().trim().toLowerCase());
+            }
+
+            Proveedor updated = proveedorRepository.save(proveedorActualizado);
+            ProveedorDto resultado = modelMapper.converterTo(updated, ProveedorDto.class);
+
+            logger.info("Proveedor actualizado exitosamente: ID {}", id);
+            return resultado;
         }).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                 "Proveedor con ID " + id + " no encontrado"));
     }
@@ -110,7 +86,7 @@ public class ProveedorService {
         return proveedorRepository.findById(id)
                 .map(proveedor -> {
                     ProveedorDto dto = modelMapper.converterTo(proveedor, ProveedorDto.class);
-                    System.out.println("Proveedor encontrado: " + dto.getNombre());
+                    logger.debug("Proveedor encontrado: {}", dto.getNombre());
                     return dto;
                 })
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
@@ -123,7 +99,7 @@ public class ProveedorService {
         return proveedorRepository.findByRuc(ruc.trim().replaceAll("\\s+", ""))
                 .map(proveedor -> {
                     ProveedorDto dto = modelMapper.converterTo(proveedor, ProveedorDto.class);
-                    System.out.println("Proveedor encontrado por RUC: " + dto.getNombre());
+                    logger.debug("Proveedor encontrado por RUC: {}", dto.getNombre());
                     return dto;
                 })
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
@@ -137,7 +113,7 @@ public class ProveedorService {
                 .map(proveedor -> modelMapper.converterTo(proveedor, ProveedorDto.class))
                 .collect(Collectors.toList());
 
-        System.out.println("Total proveedores encontrados: " + proveedores.size());
+        logger.debug("Total proveedores encontrados: {}", proveedores.size());
         return proveedores;
     }
 
@@ -149,7 +125,7 @@ public class ProveedorService {
                 .map(proveedor -> modelMapper.converterTo(proveedor, ProveedorDto.class))
                 .collect(Collectors.toList());
 
-        System.out.println("Proveedores encontrados por nombre '" + nombre + "': " + proveedores.size());
+        logger.debug("Proveedores encontrados por nombre '{}': {}", nombre, proveedores.size());
         return proveedores;
     }
 
@@ -161,7 +137,7 @@ public class ProveedorService {
                 .map(proveedor -> modelMapper.converterTo(proveedor, ProveedorDto.class))
                 .collect(Collectors.toList());
 
-        System.out.println("Proveedores encontrados por contacto '" + contacto + "': " + proveedores.size());
+        logger.debug("Proveedores encontrados por contacto '{}': {}", contacto, proveedores.size());
         return proveedores;
     }
 
@@ -171,14 +147,8 @@ public class ProveedorService {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Proveedor con ID " + id + " no encontrado");
         }
 
-        try {
-            proveedorRepository.deleteById(id);
-            System.out.println("Proveedor eliminado ID: " + id);
-        } catch (Exception e) {
-            System.err.println("Error al eliminar proveedor: " + e.getMessage());
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
-                    "Error al eliminar proveedor: " + e.getMessage());
-        }
+        proveedorRepository.deleteById(id);
+        logger.info("Proveedor eliminado ID: {}", id);
     }
 
 
@@ -200,7 +170,7 @@ public class ProveedorService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Email no válido");
         }
 
-        System.out.println("Proveedor validado correctamente");
+        logger.debug("Proveedor validado correctamente");
     }
 
     private void validarRucUnico(String ruc) {
