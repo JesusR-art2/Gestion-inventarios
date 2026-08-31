@@ -2,6 +2,7 @@ package com.Arquitecturaservicios.gestioninventarios.Service;
 
 import com.Arquitecturaservicios.gestioninventarios.Config.BuildObjectMapper;
 import com.Arquitecturaservicios.gestioninventarios.Entities.Rol;
+import com.Arquitecturaservicios.gestioninventarios.Entities.UserRole;
 import com.Arquitecturaservicios.gestioninventarios.Repository.RolRepository;
 import com.Arquitecturaservicios.gestioninventarios.dto.RolDto;
 import jakarta.transaction.Transactional;

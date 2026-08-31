@@ -40,6 +40,18 @@ src/main/java/com/Arquitecturaservicios/gestioninventarios/
 1. Copiar el archivo `.env.example` y renombrarlo a `.env`
 2. Configurar las variables de entorno según tu entorno
 3. Asegurarse de tener PostgreSQL corriendo en el puerto especificado
+4. Ejecutar el script SQL `src/main/resources/sql/init-data.sql` para crear los roles iniciales y el usuario admin
+
+```bash
+# Ejemplo de ejecución del script SQL
+psql -U admin -d gestion_inventarios -f src/main/resources/sql/init-data.sql
+```
+
+**Usuario admin por defecto:**
+- Email: `admin@gestioninventarios.com`
+- Password: `Admin123456`
+
+⚠️ **Importante:** Cambiar la contraseña del admin en producción antes de desplegar.
 
 ## Instalación y Ejecución
 

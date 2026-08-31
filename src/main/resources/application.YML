@@ -2,9 +2,9 @@ spring:
   application:
     name: GestionInventarios
   datasource:
-    url: ${DB_URL:jdbc:postgresql://localhost:5432/gestion_inventarios}
-    username: ${DB_USERNAME:admin}
-    password: ${DB_PASSWORD:1034397727}
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
@@ -21,3 +21,11 @@ logging:
 
 server:
   port: 5000
+
+jwt:
+  secret: ${JWT_SECRET:miClaveSecretaSuperSeguraParaJWT123456789}
+  expiration: ${JWT_EXPIRATION:86400}
+
+admin:
+  email: ${ADMIN_EMAIL:admin@gestioninventarios.com}
+  password: ${ADMIN_PASSWORD:Admin123456}
