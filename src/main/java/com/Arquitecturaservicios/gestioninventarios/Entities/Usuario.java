@@ -1,13 +1,13 @@
 package com.Arquitecturaservicios.gestioninventarios.Entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 
 
@@ -32,6 +32,10 @@ public class Usuario{
     private Boolean active = true;
 
     private LocalDateTime lastLogin;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL)
+    private List<UsuarioRol> roles = new ArrayList<>();
 
     @CreationTimestamp
     @Column(updatable = false)

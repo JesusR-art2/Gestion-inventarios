@@ -2,9 +2,12 @@ package com.Arquitecturaservicios.gestioninventarios.Controller;
 
 import com.Arquitecturaservicios.gestioninventarios.Service.UsuarioService;
 import com.Arquitecturaservicios.gestioninventarios.dto.UsuarioDto;
+import com.Arquitecturaservicios.gestioninventarios.dto.usuarioResponseDto;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,8 +23,9 @@ public class UsuarioController {
     }
 
     @PostMapping
-    public ResponseEntity<UsuarioDto> create(@Valid @RequestBody UsuarioDto usuarioDto) {
-        UsuarioDto saved = usuarioService.save(usuarioDto);
+    @PreAuthorize("hasAnyRole('ADMIN','GERENTE')")
+    public ResponseEntity<usuarioResponseDto> create(@Valid @RequestBody UsuarioDto usuarioDto, Authentication auth) {
+        usuarioResponseDto saved = usuarioService.save(usuarioDto, auth);
         return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
 

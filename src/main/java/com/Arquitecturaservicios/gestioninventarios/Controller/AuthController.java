@@ -37,27 +37,27 @@ public class AuthController {
         try {
             UsuarioDto usuario = usuarioService.findByEmail(loginRequest.getEmail());
             
-            if (!passwordEncoder.matches(loginRequest.getPassword(), usuario.getPassword())) {
+            if (!passwordEncoder.matches(loginRequest.getPassword(), usuario.password())) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
             }
 
-            if (usuario.getActive() == null || !usuario.getActive()) {
+            if (usuario.active() == null || !usuario.active()) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
             }
 
-            UserRole role = UserRole.ADMIN;
-            
+            UserRole role = usuarioService.obtenerRolPrincipal(usuario.email());
+
             String token = jwtUtil.generateToken(
-                usuario.getEmail(),
-                usuario.getEmail(),
+                usuario.email(),
+                usuario.email(),
                 "",
                 role
             );
 
             LoginResponseDto response = new LoginResponseDto(
                 token,
-                usuario.getEmail(),
-                usuario.getEmail(),
+                usuario.email(),
+                usuario.email(),
                 "",
                 role.name(),
                 jwtUtil.extractIssuedAt(token),

@@ -1,45 +1,60 @@
 package com.Arquitecturaservicios.gestioninventarios.Service;
 
 import com.Arquitecturaservicios.gestioninventarios.Config.BuildObjectMapper;
+import com.Arquitecturaservicios.gestioninventarios.Entities.Rol;
 import com.Arquitecturaservicios.gestioninventarios.Entities.Usuario;
+import com.Arquitecturaservicios.gestioninventarios.Entities.UsuarioRol;
+import com.Arquitecturaservicios.gestioninventarios.Repository.RolRepository;
 import com.Arquitecturaservicios.gestioninventarios.Repository.UsuarioRepository;
+import com.Arquitecturaservicios.gestioninventarios.Repository.UsuarioRolRepository;
 import com.Arquitecturaservicios.gestioninventarios.dto.UsuarioDto;
-import jakarta.transaction.Transactional;
+import com.Arquitecturaservicios.gestioninventarios.dto.usuarioResponseDto;
+import com.Arquitecturaservicios.gestioninventarios.exchange.UserRole;
+import com.Arquitecturaservicios.gestioninventarios.exchange.mappers.usuarioMapper;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.server.ResponseStatusException;
-
 import java.time.LocalDateTime;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
 @Transactional
 public class UsuarioService {
     private final UsuarioRepository usuarioRepository;
+    private final RolRepository rolRepository;
     private final BuildObjectMapper modelMapper;
+    private final UsuarioRolRepository usuarioRolRepository;
+    private final usuarioMapper usuariomapper;
 
-    public UsuarioService(BuildObjectMapper modelMapper, UsuarioRepository usuarioRepository) {
+    public UsuarioService(BuildObjectMapper modelMapper, UsuarioRepository usuarioRepository, RolRepository rolRepository, UsuarioRolRepository usuarioRolRepository, PasswordEncoder passwordEncoder, usuarioMapper usuariomapper) {
         this.modelMapper = modelMapper;
         this.usuarioRepository = usuarioRepository;
+        this.rolRepository = rolRepository;
+        this.usuarioRolRepository = usuarioRolRepository;
+        this.usuariomapper = usuariomapper;
     }
 
-    public UsuarioDto save(UsuarioDto dto) {
-        if (usuarioRepository.findByEmail(dto.getEmail()).isPresent()) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT,
-                    "Ya existe un usuario con el email: " + dto.getEmail());
-        }
+    @Transactional
+    public usuarioResponseDto save(UsuarioDto dto, Authentication auth) {
+        validarPermisoSobreRol(dto.rol(), auth);
+        validarEmailUnico(dto.email());
+        Rol rol = buscarRol(dto.rol());
 
-        validarUsuario(dto);
+        Usuario usuario = usuariomapper.toEntity(dto);
+        usuario.getRoles().add(UsuarioRol.builder().usuario(usuario).rol(rol).build());
 
-        Map<String, Object> context = new HashMap<>();
-        Usuario usuario = modelMapper.createEntityFromDto(dto, Usuario.class, context);
-
-        Usuario guardado = usuarioRepository.save(usuario);
-        return modelMapper.converterTo(guardado, UsuarioDto.class);
+        return usuariomapper.toResponse(usuarioRepository.save(usuario));
+    }
+    private usuarioResponseDto toResponse(Usuario u, String rol) {
+        return new usuarioResponseDto(u.getId(), u.getEmail(), u.getActive(),
+                List.of(rol), u.getLastLogin(), u.getDateCreate(), u.getDateUpdate());
     }
 
     @Transactional
@@ -66,6 +81,7 @@ public class UsuarioService {
                         "Usuario no encontrado"));
     }
 
+
     @Transactional
     public UsuarioDto findByEmail(String email) {
         return usuarioRepository.findByEmail(email)
@@ -89,6 +105,15 @@ public class UsuarioService {
         usuarioRepository.deleteById(id);
     }
 
+
+
+    @Transactional(readOnly = true)
+    public UserRole obtenerRolPrincipal(String email) {
+        Usuario u = usuarioRepository.findByEmail(email)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
+        return UserRole.valueOf(u.getRoles().get(0).getRol().getName());
+    }
+
     @Transactional
     public UsuarioDto updateLastLogin(Long id) {
         return usuarioRepository.findById(id).map(usuario -> {
@@ -100,18 +125,33 @@ public class UsuarioService {
     }
 
     private void validarUsuario(UsuarioDto dto) {
-        if (!StringUtils.hasText(dto.getEmail())) {
+        if (!StringUtils.hasText(dto.email())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Email es requerido");
         }
-        if (!StringUtils.hasText(dto.getPassword())) {
+        if (!StringUtils.hasText(dto.password())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Password es requerido");
         }
     }
+
 
     private void validarEmailUnico(String email) {
         if (usuarioRepository.existsByEmail(email)) {
             throw new ResponseStatusException(HttpStatus.CONFLICT,
                     "El email " + email + " ya existe en la base de datos");
         }
+    }
+    private void validarPermisoSobreRol(String rol, Authentication auth) {
+        boolean esAdmin = auth.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+
+        if (!esAdmin && !Set.of("AUX_BODEGA", "VENDEDOR").contains(rol)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                    "No tienes permiso para asignar el rol: " + rol);
+        }
+    }
+    private Rol buscarRol(String nombre) {
+        return rolRepository.findByName(nombre)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                        "El rol no existe: " + nombre));
     }
 }

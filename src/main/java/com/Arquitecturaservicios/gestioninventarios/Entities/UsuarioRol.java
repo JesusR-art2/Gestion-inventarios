@@ -2,10 +2,7 @@ package com.Arquitecturaservicios.gestioninventarios.Entities;
 
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
@@ -15,6 +12,7 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @AllArgsConstructor
+@Builder
 @Table(name = "usuario_rol")
 public class UsuarioRol {
 
