@@ -1,6 +1,6 @@
 package com.Arquitecturaservicios.gestioninventarios.Config;
 
-import com.Arquitecturaservicios.gestioninventarios.Entities.UserRole;
+import com.Arquitecturaservicios.gestioninventarios.exchange.UserRole;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

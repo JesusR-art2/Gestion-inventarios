@@ -1,7 +1,7 @@
 package com.Arquitecturaservicios.gestioninventarios.Repository;
 
 import com.Arquitecturaservicios.gestioninventarios.Entities.Venta;
-import com.Arquitecturaservicios.gestioninventarios.Entities.EstadoVenta;
+import com.Arquitecturaservicios.gestioninventarios.exchange.EstadoVenta;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

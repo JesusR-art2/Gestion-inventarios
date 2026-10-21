@@ -1,5 +1,6 @@
 package com.Arquitecturaservicios.gestioninventarios.Entities;
 
+import com.Arquitecturaservicios.gestioninventarios.exchange.EstadoVenta;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;

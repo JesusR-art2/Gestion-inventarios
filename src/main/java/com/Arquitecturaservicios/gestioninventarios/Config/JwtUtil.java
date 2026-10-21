@@ -1,6 +1,6 @@
 package com.Arquitecturaservicios.gestioninventarios.Config;
 
-import com.Arquitecturaservicios.gestioninventarios.Entities.UserRole;
+import com.Arquitecturaservicios.gestioninventarios.exchange.UserRole;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;

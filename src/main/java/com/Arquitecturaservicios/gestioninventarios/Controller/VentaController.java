@@ -2,11 +2,9 @@ package com.Arquitecturaservicios.gestioninventarios.Controller;
 
 import com.Arquitecturaservicios.gestioninventarios.Service.VentaService;
 import com.Arquitecturaservicios.gestioninventarios.dto.VentaDto;
-import com.Arquitecturaservicios.gestioninventarios.Entities.EstadoVenta;
+import com.Arquitecturaservicios.gestioninventarios.exchange.EstadoVenta;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;

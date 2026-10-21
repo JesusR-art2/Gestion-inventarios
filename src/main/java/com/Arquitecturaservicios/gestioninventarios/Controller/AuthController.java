@@ -1,7 +1,7 @@
 package com.Arquitecturaservicios.gestioninventarios.Controller;
 
 import com.Arquitecturaservicios.gestioninventarios.Config.JwtUtil;
-import com.Arquitecturaservicios.gestioninventarios.Entities.UserRole;
+import com.Arquitecturaservicios.gestioninventarios.exchange.UserRole;
 import com.Arquitecturaservicios.gestioninventarios.Repository.UsuarioRepository;
 import com.Arquitecturaservicios.gestioninventarios.Service.UsuarioService;
 import com.Arquitecturaservicios.gestioninventarios.dto.LoginRequestDto;

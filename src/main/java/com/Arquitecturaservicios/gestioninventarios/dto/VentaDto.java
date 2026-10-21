@@ -1,6 +1,6 @@
 package com.Arquitecturaservicios.gestioninventarios.dto;
 
-import com.Arquitecturaservicios.gestioninventarios.Entities.EstadoVenta;
+import com.Arquitecturaservicios.gestioninventarios.exchange.EstadoVenta;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

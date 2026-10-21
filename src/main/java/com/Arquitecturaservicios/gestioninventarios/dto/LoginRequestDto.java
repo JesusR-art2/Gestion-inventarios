@@ -2,13 +2,12 @@ package com.Arquitecturaservicios.gestioninventarios.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
-@Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Getter
+@Setter
 public class LoginRequestDto {
     
     @NotBlank(message = "Email es requerido")

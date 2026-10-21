@@ -4,7 +4,7 @@ import com.Arquitecturaservicios.gestioninventarios.Config.BuildObjectMapper;
 import com.Arquitecturaservicios.gestioninventarios.Entities.Venta;
 import com.Arquitecturaservicios.gestioninventarios.Entities.DetalleVenta;
 import com.Arquitecturaservicios.gestioninventarios.Entities.Cliente;
-import com.Arquitecturaservicios.gestioninventarios.Entities.EstadoVenta;
+import com.Arquitecturaservicios.gestioninventarios.exchange.EstadoVenta;
 import com.Arquitecturaservicios.gestioninventarios.Repository.VentaRepository;
 import com.Arquitecturaservicios.gestioninventarios.Repository.ClienteRepository;
 import com.Arquitecturaservicios.gestioninventarios.dto.VentaDto;

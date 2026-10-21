@@ -1,4 +1,4 @@
-package com.Arquitecturaservicios.gestioninventarios.Entities;
+package com.Arquitecturaservicios.gestioninventarios.exchange;
 
 public enum EstadoVenta {
     PENDIENTE,
